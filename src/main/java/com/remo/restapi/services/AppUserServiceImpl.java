@@ -1,8 +1,10 @@
 package com.remo.restapi.services;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.remo.restapi.models.AppUser;
+import com.remo.restapi.repositories.IAppRoleRepository;
 import com.remo.restapi.repositories.IAppUserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,9 @@ public class AppUserServiceImpl implements IAppUserService {
 
     @Autowired
     private IAppUserRepository userRepository;
+
+    @Autowired
+    private IAppRoleRepository roleRepository;
 
     @Override
     public AppUser saveUser(AppUser user) {
@@ -30,13 +35,23 @@ public class AppUserServiceImpl implements IAppUserService {
     }
 
     @Override
-    public AppUser getUser(Long id) {
-        return userRepository.getById(id);
+    public Optional<AppUser> getUser(Long id) {
+        return userRepository.findById(id);
     }
 
     @Override
     public void deleteUser(Long id) {
         userRepository.deleteById(id);        
     }
-    
+
+    @Override
+    public boolean userExists(Long id) {
+        return userRepository.existsById(id);
+    }
+
+    @Override
+    public void addRoleToUser(String username, String role) {
+
+    }
+
 }

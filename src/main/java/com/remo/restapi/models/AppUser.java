@@ -15,10 +15,10 @@ public class AppUser {
     private String password;
     private String photo;
     private String phone;
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     private List<AppRole> roles;
 
-    public AppUser(Long id, String name, String lastname, String username, String password, String photo, String phone) {
+    public AppUser(Long id, String name, String lastname, String username, String password, String photo, String phone, List<AppRole> roles) {
         this.id = id;
         this.name = name;
         this.lastname = lastname;
@@ -26,6 +26,7 @@ public class AppUser {
         this.password = password;
         this.photo = photo;
         this.phone = phone;
+        this.roles = roles;
     }
 
     public AppUser() {
