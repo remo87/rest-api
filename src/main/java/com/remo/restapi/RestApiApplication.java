@@ -4,6 +4,8 @@ import com.remo.restapi.models.AppRole;
 import com.remo.restapi.models.AppUser;
 import com.remo.restapi.services.IAppUserService;
 import com.remo.restapi.services.IRoleService;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import java.util.ArrayList;
 
 @SpringBootApplication
+@OpenAPIDefinition(info = @Info(title = "Employees API", version = "2.0", description = "Employees Information"))
 public class RestApiApplication {
 
     public static void main(String[] args) {
