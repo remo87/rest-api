@@ -3,6 +3,7 @@ package com.remo.restapi.services;
 import java.util.List;
 import java.util.Optional;
 
+import com.remo.restapi.models.AppRole;
 import com.remo.restapi.models.AppUser;
 import com.remo.restapi.repositories.IAppRoleRepository;
 import com.remo.restapi.repositories.IAppUserRepository;
@@ -50,8 +51,24 @@ public class AppUserServiceImpl implements IAppUserService {
     }
 
     @Override
-    public void addRoleToUser(String username, String role) {
+    public boolean userExists(String username) {
+        return userRepository.findByUsername(username) != null;
+    }
 
+    @Override
+    public AppUser addRoleToUser(Long userId, Long roleId) {
+        AppUser user = userRepository.getById(userId);
+        AppRole appRole = roleRepository.getById(roleId);
+        user.getRoles().add(appRole);
+        return userRepository.save(user);
+    }
+
+    @Override
+    public AppUser addRoleToUser(String username, String roleName) {
+        AppUser user = userRepository.findByUsername(username);
+        AppRole appRole = roleRepository.findByName(roleName);
+        user.getRoles().add(appRole);
+        return userRepository.save(user);
     }
 
 }

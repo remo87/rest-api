@@ -1,38 +1,43 @@
 package com.remo.restapi.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 @Entity
 @Table(name = "app_roles")
-public class AppRole {
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+@Data @AllArgsConstructor @NoArgsConstructor
+public class AppRole implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String name;
-
-    public AppRole() {
-    }
+    @Column(name = "created_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt;
+    @Column(name = "updated_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updateAt;
 
     public AppRole(Long id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public Long getId() {
-        return id;
+    @PrePersist
+    public void prePersist() {
+        createdAt = new Date();
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    @PreUpdate
+    public void preUpdate() {
+        updateAt = new Date();
     }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
 }

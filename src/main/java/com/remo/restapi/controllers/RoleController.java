@@ -27,7 +27,7 @@ public class RoleController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AppRole> geRoleById(Long id){
+    public ResponseEntity<AppRole> geRoleById(@PathVariable Long id){
         Optional<AppRole> roleOptional = roleService.getRoleById(id);
         if(roleOptional.isEmpty())
             throw new NotFoundException("User not found");
