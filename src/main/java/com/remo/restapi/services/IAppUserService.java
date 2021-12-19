@@ -18,6 +18,7 @@ public interface IAppUserService {
     void deleteUser(Long id);
     boolean userExists(Long id);
     boolean userExists(String username);
+    AppUser findByUsername(String username);
     AppUser addRoleToUser(Long userId, Long roleId);
     AppUser addRoleToUser(String username, String roleName);
 }

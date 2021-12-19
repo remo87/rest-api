@@ -1,5 +1,7 @@
 package com.remo.restapi.services;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,10 +11,19 @@ import com.remo.restapi.repositories.IAppRoleRepository;
 import com.remo.restapi.repositories.IAppUserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AppUserServiceImpl implements IAppUserService {
+public class AppUserServiceImpl implements IAppUserService, UserDetailsService {
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
     private IAppUserRepository userRepository;
@@ -22,11 +33,13 @@ public class AppUserServiceImpl implements IAppUserService {
 
     @Override
     public AppUser saveUser(AppUser user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
     @Override
     public AppUser updateUser(AppUser user) {
+//        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
@@ -56,6 +69,11 @@ public class AppUserServiceImpl implements IAppUserService {
     }
 
     @Override
+    public AppUser findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    @Override
     public AppUser addRoleToUser(Long userId, Long roleId) {
         AppUser user = userRepository.getById(userId);
         AppRole appRole = roleRepository.getById(roleId);
@@ -71,4 +89,14 @@ public class AppUserServiceImpl implements IAppUserService {
         return userRepository.save(user);
     }
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        AppUser user = userRepository.findByUsername(username);
+        if(user == null){
+            throw new UsernameNotFoundException("User not found in the database.");
+        }
+        Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        user.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority(role.getName())));
+        return new User(user.getUsername(), user.getPassword(), authorities);
+    }
 }

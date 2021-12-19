@@ -8,6 +8,7 @@ import com.remo.restapi.mappers.IRoleMapper;
 import com.remo.restapi.models.AppRole;
 import com.remo.restapi.services.IAppUserService;
 import com.remo.restapi.services.IRoleService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
+@SecurityRequirement(name = "restapi")
 @RequestMapping("/api/roles")
 public class RoleController {
 

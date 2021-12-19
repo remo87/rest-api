@@ -1,30 +1,45 @@
 package com.remo.restapi.controllers;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.core.exc.StreamWriteException;
+import com.fasterxml.jackson.databind.DatabindException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.remo.restapi.dtos.CreateUserDto;
 import com.remo.restapi.dtos.UpdateUserDto;
 import com.remo.restapi.dtos.UserDetailDto;
 import com.remo.restapi.dtos.UserListItemDto;
 import com.remo.restapi.exceptions.NotFoundException;
 import com.remo.restapi.mappers.IUserMapper;
+import com.remo.restapi.models.AppRole;
 import com.remo.restapi.models.AppUser;
 import com.remo.restapi.services.IAppUserService;
 import com.remo.restapi.services.IRoleService;
+import com.remo.restapi.services.ISecurityService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.http.HttpHeaders;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.swing.text.html.Option;
+import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
 @RestController
+@SecurityRequirement(name = "restapi")
 @RequestMapping("/api/users")
 public class UserController {
 
@@ -33,6 +48,9 @@ public class UserController {
 
     @Autowired
     private IRoleService roleService;
+
+    @Autowired
+    private ISecurityService securityService;
 
     private IUserMapper mapper = IUserMapper.MAPPER;
 
@@ -110,6 +128,33 @@ public class UserController {
         AppUser updatedUser = userService.addRoleToUser(id, roleId);
         UserDetailDto user = mapper.toUserDetailDto(updatedUser);
         return ResponseEntity.ok(user);
+    }
+
+    @GetMapping("/token/refresh")
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws StreamWriteException, DatabindException, IOException {
+
+        String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if(authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            try {
+                String uri = request.getRequestURI().toString();
+                String refresh_token = authorizationHeader.substring("Bearer ".length());
+                String access_token = securityService.verifyRefreshAndGenerateAuthToken(uri,authorizationHeader);
+                Map<String, String> tokens = new HashMap<>();
+                tokens.put("access_token", access_token);
+                tokens.put("refresh_token", refresh_token);
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                new ObjectMapper().writeValue(response.getOutputStream(), tokens);
+            }catch (Exception exception) {
+                response.setHeader("error", exception.getMessage());
+                response.setStatus(HttpStatus.FORBIDDEN.value());
+                Map<String, String> error = new HashMap<>();
+                error.put("error_message", exception.getMessage());
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                new ObjectMapper().writeValue(response.getOutputStream(), error);
+            }
+        } else {
+            throw new RuntimeException("refresh token is missing");
+        }
     }
 
 }
